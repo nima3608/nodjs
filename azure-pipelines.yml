@@ -1,0 +1,113 @@
+# Azure Pipeline for Node.js Project
+
+trigger:
+  branches:
+    include:
+    - main
+    - develop
+    - feature/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: 'Build and Test'
+  jobs:
+  - job: BuildAndTest
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install
+      displayName: 'npm install'
+      
+    - script: |
+        npm run lint
+      displayName: 'Run linting'
+      continueOnError: true
+      
+    - script: |
+        npm test
+      displayName: 'Run tests'
+      
+    - script: |
+        npm run build
+      displayName: 'Build application'
+      
+    - task: PublishTestResults@2
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/junit-*.xml'
+        mergeTestResults: true
+      displayName: 'Publish test results'
+      condition: succeededOrFailed()
+      
+    - task: PublishCodeCoverageResults@1
+      inputs:
+        codeCoverageTool: 'Cobertura'
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/coverage/cobertura-coverage.xml'
+        reportDirectory: '$(System.DefaultWorkingDirectory)/coverage'
+      displayName: 'Publish code coverage'
+      condition: succeededOrFailed()
+      
+    - task: ArchiveFiles@2
+      inputs:
+        rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+        includeRootFolder: false
+        archiveType: 'zip'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip'
+        replaceExistingArchive: true
+        exclude: |
+          **/node_modules/**
+          **/.git/**
+          **/.vscode/**
+      displayName: 'Archive files'
+      
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'drop'
+        publishLocation: 'Container'
+      displayName: 'Publish artifacts'
+
+- stage: Deploy_Dev
+  displayName: 'Deploy to Development'
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  jobs:
+  - deployment: DeployDev
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Your-Azure-Service-Connection'
+              appName: 'your-app-name-dev'
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              deploymentMethod: 'auto'
+            displayName: 'Deploy to Dev App Service'
+
+- stage: Deploy_Prod
+  displayName: 'Deploy to Production'
+  dependsOn: Build
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - deployment: DeployProd
+    environment: 'production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: 'Your-Azure-Service-Connection'
+              appName: 'your-app-name-prod'
+              package: '$(Pipeline.Workspace)/drop/$(Build.BuildId).zip'
+              deploymentMethod: 'auto'
+            displayName: 'Deploy to Prod App Service'

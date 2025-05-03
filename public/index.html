@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Express API Demo</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <style>
+        .json-response {
+            max-height: 300px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .endpoint:hover {
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-blue-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold">Advanced Express API Demo</h1>
+            <p class="mt-2">A comprehensive REST API with authentication and multiple endpoints</p>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">API Status</h2>
+            <div class="flex flex-col md:flex-row gap-4">
+                <button id="checkStatus" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">
+                    Check API Status
+                </button>
+                <div id="apiStatusDisplay" class="border rounded p-2 bg-gray-50 text-gray-800 flex-grow min-h-[50px]">
+                    Status will appear here...
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-semibold mb-4">API Authentication</h2>
+            <div class="mb-4">
+                <label for="apiKey" class="block mb-2 text-sm font-medium text-gray-700">API Key</label>
+                <input type="text" id="apiKey" class="w-full p-2 border rounded" value="secret-api-key-1234" placeholder="Enter API key">
+                <p class="text-sm text-gray-500 mt-1">Default: secret-api-key-1234</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">API Endpoints</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Users Section -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-lg mb-2">Users</h3>
+                    
+                    <div class="endpoint p-3 border-b cursor-pointer" data-endpoint="/api/users">
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-sm bg-green-100 text-green-800 px-2 py-1 rounded">GET</span>
+                            <span class="flex-grow ml-4">/api/users</span>
+                            <button class="px-3 py-1 bg-blue-500 text-white text-sm rounded">Try</button>
+                        </div>
+                        <div class="mt-2 text-sm hidden">
+                            <div class="mb-2">
+                                <label class="block mb-1">Query Parameters</label>
+                                <input type="text" placeholder="role=admin" class="endpoint-params w-full p-1 border rounded text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint p-3 border-b cursor-pointer" data-endpoint="/api/users/1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-sm bg-green-100 text-green-800 px-2 py-1 rounded">GET</span>
+                            <span class="flex-grow ml-4">/api/users/:id</span>
+                            <button class="px-3 py-1 bg-blue-500 text-white text-sm rounded">Try</button>
+                        </div>
+                        <div class="mt-2 text-sm hidden">
+                            <div class="mb-2">
+                                <label class="block mb-1">User ID</label>
+                                <input type="number" value="1" class="endpoint-params w-full p-1 border rounded text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint p-3 cursor-pointer" data-endpoint="/api/users">
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-sm bg-yellow-100 text-yellow-800 px-2 py-1 rounded">POST</span>
+                            <span class="flex-grow ml-4">/api/users</span>
+                            <button class="px-3 py-1 bg-blue-500 text-white text-sm rounded">Try</button>
+                        </div>
+                        <div class="mt-2 text-sm hidden">
+                            <div class="mb-2">
+                                <label class="block mb-1">Request Body (JSON)</label>
+                                <textarea class="endpoint-params w-full p-1 border rounded text-sm" rows="4">{ 
+  "name": "New User", 
+  "email": "newuser@example.com", 
+  "role": "user" 
+}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Products Section -->
+                <div class="border rounded-lg p-4">
+                    <h3 class="font-semibold text-lg mb-2">Products</h3>
+                    
+                    <div class="endpoint p-3 border-b cursor-pointer" data-endpoint="/api/products">
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-sm bg-green-100 text-green-800 px-2 py-1 rounded">GET</span>
+                            <span class="flex-grow ml-4">/api/products</span>
+                            <button class="px-3 py-1 bg-blue-500 text-white text-sm rounded">Try</button>
+                        </div>
+                        <div class="mt-2 text-sm hidden">
+                            <div class="mb-2">
+                                <label class="block mb-1">Query Parameters</label>
+                                <input type="text" placeholder="minPrice=500" class="endpoint-params w-full p-1 border rounded text-sm">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="endpoint p-3 cursor-pointer" data-endpoint="/api/products/101">
+                        <div class="flex justify-between items-center">
+                            <span class="font-mono text-sm bg-green-100 text-green-800 px-2 py-1 rounded">GET</span>
+                            <span class="flex-grow ml-4">/api/products/:id</span>
+                            <button class="px-3 py-1 bg-blue-500 text-white text-sm rounded">Try</button>
+                        </div>
+                        <div class="mt-2 text-sm hidden">
+                            <div class="mb-2">
+                                <label class="block mb-1">Product ID</label>
+                                <input type="number" value="101" class="endpoint-params w-full p-1 border rounded text-sm">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Response Section -->
+            <div class="mt-6">
+                <h3 class="font-semibold text-lg mb-2">Response</h3>
+                <div class="border rounded bg-gray-50">
+                    <div class="border-b bg-gray-100 p-2 flex justify-between items-center">
+                        <span class="font-semibold" id="responseUrl">No request made yet</span>
+                        <span class="text-sm font-mono" id="responseStatus"></span>
+                    </div>
+                    <pre id="responseData" class="json-response p-4 text-sm">No data to display</pre>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-4 mt-8">
+        <div class="container mx-auto px-4 text-center text-sm">
+            <p>Advanced Express API Demo &copy; 2025</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle endpoint details
+            document.querySelectorAll('.endpoint').forEach(endpoint => {
+                endpoint.querySelector('button').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const details = endpoint.querySelector('div.hidden');
+                    if (details) {
+                        details.classList.remove('hidden');
+                    }
+                    makeRequest(endpoint);
+                });
+                
+                endpoint.addEventListener('click', () => {
+                    const details = endpoint.querySelector('div.hidden');
+                    if (details) {
+                        details.classList.remove('hidden');
+                    } else {
+                        endpoint.querySelector('div.mt-2').classList.add('hidden');
+                    }
+                });
+            });
+            
+            // Check API status button
+            document.getElementById('checkStatus').addEventListener('click', async () => {
+                try {
+                    const response = await fetch('/api/status');
+                    const data = await response.json();
+                    
+                    document.getElementById('apiStatusDisplay').innerHTML = 
+                        `<div class="text-green-600">✓ API is online</div>
+                         <div class="text-sm mt-1">Server time: ${new Date(data.time).toLocaleString()}</div>`;
+                } catch (error) {
+                    document.getElementById('apiStatusDisplay').innerHTML = 
+                        `<div class="text-red-600">✗ API is offline</div>
+                         <div class="text-sm mt-1">${error.message}</div>`;
+                }
+            });
+            
+            // Make API requests
+            async function makeRequest(endpointEl) {
+                const baseEndpoint = endpointEl.dataset.endpoint;
+                const method = endpointEl.querySelector('span.font-mono').textContent;
+                const apiKey = document.getElementById('apiKey').value;
+                const paramsInput = endpointEl.querySelector('.endpoint-params');
+                
+                let url = baseEndpoint;
+                let options = {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    }
+                };
+                
+                // Handle different parameter types based on endpoint
+                if (paramsInput) {
+                    if (paramsInput.tagName === 'TEXTAREA') {
+                        // It's a JSON body for POST requests
+                        try {
+                            options.body = paramsInput.value;
+                        } catch (e) {
+                            alert('Invalid JSON in request body');
+                            return;
+                        }
+                    } else if (baseEndpoint.includes(':id')) {
+                        // It's a URL parameter
+                        url = baseEndpoint.replace(':id', paramsInput.value);
+                    } else if (paramsInput.value) {
+                        // It's a query parameter
+                        url = `${baseEndpoint}?${paramsInput.value}`;
+                    }
+                }
+                
+                // Display request info
+                document.getElementById('responseUrl').textContent = `${method} ${url}`;
+                document.getElementById('responseStatus').textContent = 'Loading...';
+                document.getElementById('responseData').textContent = 'Fetching data...';
+                
+                try {
+                    const response = await fetch(url, options);
+                    const data = await response.json();
+                    
+                    // Display response
+                    document.getElementById('responseStatus').textContent = `${response.status} ${response.statusText}`;
+                    document.getElementById('responseData').textContent = JSON.stringify(data, null, 2);
+                    
+                    // Add color based on status
+                    if (response.ok) {
+                        document.getElementById('responseStatus').className = 'text-sm font-mono text-green-600';
+                    } else {
+                        document.getElementById('responseStatus').className = 'text-sm font-mono text-red-600';
+                    }
+                } catch (error) {
+                    document.getElementById('responseStatus').textContent = 'Error';
+                    document.getElementById('responseStatus').className = 'text-sm font-mono text-red-600';
+                    document.getElementById('responseData').textContent = error.message;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
